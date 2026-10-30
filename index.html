@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Muhammad Asad Sarfraz</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Muhammad Asad Sarfraz — AI Engineer and Backend Lead building LLM apps, RAG systems and intelligent automation.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: single centered column, sticky glass nav, hero with live "retrieval pipeline" console, timeline experience. Dark-only by design. */
+:root{
+  --bg:#070b0f;
+  --surface:#0d1419;
+  --surface-2:#121c22;
+  --line:#1d2b33;
+  --fg:#e6eef0;
+  --muted:#8ea2aa;
+  --accent:#4fe0c8;
+  --accent-2:#f5b85a;
+  --accent-ink:#062521;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --radius:14px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:5rem}
+body{
+  margin:0;background:var(--bg);color:var(--fg);
+  font:400 1rem/1.65 var(--body);
+  -webkit-font-smoothing:antialiased;
+}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+a{color:inherit}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+.wrap{
+  max-width:1080px;margin:0 auto;
+  padding-left:max(16px, env(safe-area-inset-left,0px));
+  padding-right:max(16px, env(safe-area-inset-right,0px));
+}
+.glow{
+  position:fixed;inset:-20% -10% auto auto;width:60vmax;height:60vmax;pointer-events:none;z-index:0;
+  background:radial-gradient(closest-side, color-mix(in srgb, var(--accent) 14%, transparent), transparent);
+}
+main,header,footer{position:relative;z-index:1}
+
+/* Nav */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;
+  background:color-mix(in srgb, var(--bg) 78%, transparent);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding-block:.85rem}
+.mono-mark{font:800 1.15rem/1 var(--display);text-decoration:none;letter-spacing:-.02em}
+.mono-mark span{color:var(--accent)}
+.nav-links{display:flex;gap:1.5rem;list-style:none;margin:0;padding:0;font-size:.92rem}
+.nav-links a{text-decoration:none;color:var(--muted);transition:color .2s}
+.nav-links a:hover{color:var(--fg)}
+.menu-btn{display:none;background:none;border:1px solid var(--line);color:var(--fg);border-radius:8px;padding:.4rem .7rem;font:500 .85rem var(--mono);cursor:pointer}
+.mobile-menu{border-top:1px solid var(--line)}
+.mobile-menu ul{list-style:none;margin:0;padding-block:.5rem;display:grid}
+.mobile-menu a{display:block;padding:.6rem 0;text-decoration:none;color:var(--muted)}
+@media (max-width:760px){.nav-links{display:none}.menu-btn{display:inline-block}}
+
+/* Buttons & chips */
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.1rem;border-radius:10px;
+  font:600 .92rem var(--body);text-decoration:none;border:1px solid var(--line);background:var(--surface);
+  color:var(--fg);cursor:pointer;transition:border-color .2s, transform .2s}
+.btn:hover{border-color:color-mix(in srgb, var(--accent) 50%, var(--line));transform:translateY(-1px)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn svg{width:18px;height:18px;flex:none}
+.chip{display:inline-block;font:500 .8rem/1 var(--mono);padding:.45rem .65rem;border-radius:999px;
+  border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+.label{font:500 .75rem/1 var(--mono);text-transform:uppercase;letter-spacing:.14em;color:var(--accent)}
+
+/* Sections */
+section{padding-block:clamp(3.5rem,8vw,6rem)}
+section + section{border-top:1px solid var(--line)}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;letter-spacing:-.02em}
+h2{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700;line-height:1.1;margin-top:.7rem}
+.section-head{margin-bottom:2.5rem;max-width:62ch}
+.section-head p{color:var(--muted);margin:.8rem 0 0}
+
+/* Hero */
+.hero{padding-block:clamp(3rem,8vw,5.5rem) clamp(3rem,6vw,4.5rem)}
+.hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(2rem,5vw,4rem);align-items:center}
+.hero-grid > *{min-width:0}
+.status{display:inline-flex;align-items:center;gap:.55rem;font:500 .8rem var(--mono);color:var(--muted);
+  border:1px solid var(--line);border-radius:999px;padding:.4rem .8rem;background:var(--surface)}
+.status i{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 0 var(--accent);animation:ping 2.4s infinite}
+@keyframes ping{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 60%,transparent)}70%,100%{box-shadow:0 0 0 9px transparent}}
+.hero h1{font-size:clamp(2.6rem,7vw,4.6rem);font-weight:800;line-height:.98;margin-top:1.4rem}
+.hero h1 .soft{color:var(--muted);font-weight:500}
+.tagline{font:500 clamp(1.05rem,2.2vw,1.3rem)/1.4 var(--body);margin:1.2rem 0 0}
+.tagline em{font-style:normal;color:var(--accent)}
+.hero p.lede{color:var(--muted);max-width:56ch;margin:1rem 0 0}
+.cta-row{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.8rem}
+
+/* Pipeline console */
+.console{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
+  box-shadow:0 30px 80px -40px color-mix(in srgb, var(--accent) 45%, transparent)}
+.console-bar{display:flex;align-items:center;gap:.4rem;padding:.7rem .9rem;border-bottom:1px solid var(--line);
+  font:500 .75rem var(--mono);color:var(--muted)}
+.console-bar b{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.console-bar span{margin-left:.5rem}
+.console-body{padding:1.1rem;font:400 .8rem/1.7 var(--mono);overflow-x:auto}
+.step{display:grid;grid-template-columns:5.2rem 1fr;gap:.6rem;padding:.35rem 0}
+.step .k{color:var(--muted)}
+.step .v{color:var(--fg);white-space:nowrap}
+.step .v .hl{color:var(--accent)}
+.step .v .amb{color:var(--accent-2)}
+.step.active .k{color:var(--accent)}
+.hits{margin:.3rem 0 .4rem 5.8rem;display:grid;gap:.3rem}
+.hit{display:flex;align-items:center;gap:.6rem;white-space:nowrap}
+.bar{height:6px;border-radius:3px;background:var(--accent);opacity:.85}
+.hit small{color:var(--muted)}
+.answer{margin-top:.6rem;padding:.7rem .8rem;border-radius:10px;background:var(--surface-2);color:var(--fg);
+  font:400 .82rem/1.55 var(--body)}
+.caret{display:inline-block;width:.5ch;height:1em;background:var(--accent);vertical-align:-2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-top:clamp(2.5rem,6vw,4rem)}
+.stat{background:var(--bg);padding:1.3rem 1.2rem}
+.stat strong{display:block;font:700 clamp(1.5rem,3vw,2rem)/1.1 var(--display);font-variant-numeric:tabular-nums}
+.stat strong .arrow{color:var(--accent)}
+.stat span{display:block;color:var(--muted);font-size:.86rem;margin-top:.35rem}
+
+/* About */
+.about-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:clamp(2rem,5vw,4rem)}
+.about-grid > *{min-width:0}
+.about-grid p{margin:0 0 1rem;max-width:62ch}
+.facts{display:grid;gap:0;border-top:1px solid var(--line);align-self:start}
+.facts div{display:flex;justify-content:space-between;gap:1rem;padding:.85rem 0;border-bottom:1px solid var(--line);font-size:.93rem}
+.facts dt{color:var(--muted)}
+.facts dd{margin:0;text-align:right}
+
+/* Skills */
+.skills{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.skill{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:1.3rem;transition:border-color .25s}
+.skill:hover{border-color:color-mix(in srgb, var(--accent) 40%, var(--line))}
+.skill h3{font-size:1.05rem;font-weight:700;display:flex;align-items:center;gap:.55rem}
+.skill h3 svg{width:20px;height:20px;color:var(--accent);flex:none}
+.skill .chips{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:1rem}
+
+/* Experience */
+.timeline{position:relative;display:grid;gap:1.25rem;padding-left:1.6rem}
+.timeline::before{content:"";position:absolute;left:5px;top:.6rem;bottom:.6rem;width:1px;background:var(--line)}
+.role{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:clamp(1.1rem,3vw,1.6rem)}
+.role::before{content:"";position:absolute;left:calc(-1.6rem + 1px);top:1.75rem;width:9px;height:9px;border-radius:50%;
+  background:var(--bg);border:2px solid var(--accent)}
+.role-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:.4rem 1rem;align-items:baseline}
+.role h3{font-size:1.25rem;font-weight:700}
+.role .org{color:var(--accent);font-weight:600}
+.role time{font:500 .8rem var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.role ul{margin:1rem 0 0;padding-left:1.1rem;display:grid;gap:.45rem;color:color-mix(in srgb, var(--fg) 88%, var(--muted))}
+.role ul li::marker{color:var(--accent)}
+.role .chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:1.1rem}
+
+/* Projects */
+.projects{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.project{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
+  transition:transform .3s, border-color .3s}
+.project:hover{transform:translateY(-4px);border-color:color-mix(in srgb, var(--accent) 40%, var(--line))}
+.project-art{height:130px;border-bottom:1px solid var(--line);background:var(--surface-2);position:relative;overflow:hidden}
+.project-art canvas{width:100%;height:100%;display:block}
+.project-body{padding:1.3rem;display:flex;flex-direction:column;gap:.8rem;flex:1}
+.project h3{font-size:1.15rem;font-weight:700}
+.project p{margin:0;color:var(--muted);font-size:.93rem}
+.project .chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:auto;padding-top:.4rem}
+
+/* Education */
+.edu-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.edu{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:1.4rem}
+.edu h3{font-size:1.1rem;font-weight:700}
+.edu .org{color:var(--muted);margin:.3rem 0 0;font-size:.93rem}
+.edu time{display:block;font:500 .8rem var(--mono);color:var(--accent);margin-top:.7rem}
+.edu ul{margin:.8rem 0 0;padding-left:1.1rem;color:var(--muted);font-size:.93rem;display:grid;gap:.3rem}
+
+/* Contact */
+.contact{text-align:left}
+.contact h2{font-size:clamp(2.2rem,6vw,3.6rem)}
+.contact-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-top:2rem}
+.contact-card{display:flex;align-items:center;justify-content:space-between;gap:1rem;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--radius);padding:1rem 1.2rem;min-width:0}
+.contact-card > div{min-width:0}
+.contact-card small{display:block;font:500 .72rem var(--mono);text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+.contact-card a,.contact-card .val{display:block;font-weight:600;margin-top:.2rem;overflow-wrap:anywhere;text-decoration:none;user-select:all}
+.contact-card a:hover{color:var(--accent)}
+.copy{flex:none;background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:.4rem .7rem;font:500 .78rem var(--mono);cursor:pointer}
+.copy:hover{color:var(--fg);border-color:var(--accent)}
+footer{border-top:1px solid var(--line);padding-block:1.6rem;color:var(--muted);font-size:.85rem}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:.5rem}
+
+@media (max-width:900px){
+  .hero-grid,.about-grid{grid-template-columns:1fr}
+  .skills,.projects{grid-template-columns:1fr 1fr}
+  .stats{grid-template-columns:1fr 1fr}
+}
+@media (max-width:600px){
+  .skills,.projects,.edu-grid,.contact-grid{grid-template-columns:1fr}
+  .hits{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<div class="glow" aria-hidden="true"></div>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="mono-mark" href="#top">asad<span>.</span>sarfraz</a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#education">Education</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <button class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="mobile-menu">Menu</button>
+  </div>
+  <nav class="mobile-menu" id="mobile-menu" hidden>
+    <ul class="wrap">
+      <li><a href="#about">About</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#education">Education</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="top">
+  <!-- Hero -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <span class="status"><i></i>Open to AI engineering roles &amp; contracts</span>
+          <h1>Muhammad Asad <span class="soft">Sarfraz</span></h1>
+          <p class="tagline">AI Engineer building <em>LLM apps</em>, <em>RAG systems</em> and intelligent automation.</p>
+          <p class="lede">7+ years shipping production backends, the last 2+ wiring LLMs into them. I design retrieval pipelines on Elasticsearch, agent workflows with LangChain and LangGraph, and the APIs that hold it all together.</p>
+          <div class="cta-row">
+            <a class="btn primary" href="#projects">See my work</a>
+            <a class="btn" href="https://github.com/asadsarfraz2347" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.4c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.38-5.25 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>
+              GitHub
+            </a>
+            <a class="btn" href="https://www.linkedin.com/in/muhammad-asad-sarfraz" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0Z"/></svg>
+              LinkedIn
+            </a>
+            <a class="btn" href="#contact">Contact</a>
+          </div>
+        </div>
+
+        <div class="console" aria-label="Example RAG pipeline run">
+          <div class="console-bar"><b></b><b></b><b></b><span>rag_pipeline.py — property search</span></div>
+          <div class="console-body" id="pipeline">
+            <div class="step active"><span class="k">query</span><span class="v">"quiet villa near Lucca, pool, sleeps 8"</span></div>
+            <div class="step"><span class="k">embed</span><span class="v"><span class="hl">dense_vector</span>[1024] + <span class="amb">BM25</span> terms</span></div>
+            <div class="step"><span class="k">retrieve</span><span class="v">es.search(index=<span class="hl">"properties"</span>, k=<span class="amb">5</span>)</span></div>
+            <div class="hits">
+              <div class="hit"><span class="bar" style="width:92px"></span><small>0.91 · Villa Le Colline</small></div>
+              <div class="hit"><span class="bar" style="width:80px"></span><small>0.84 · Podere San Rocco</small></div>
+              <div class="hit"><span class="bar" style="width:64px"></span><small>0.72 · Casale Ulivi</small></div>
+            </div>
+            <div class="step"><span class="k">generate</span><span class="v">claude · grounded on <span class="amb">3</span> docs</span></div>
+            <div class="answer" id="answer">Villa Le Colline fits best: 4 bedrooms, private pool, 12 min from Lucca on a quiet hillside.<span class="caret"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><strong>7+ yrs</strong><span>building production backends</span></div>
+        <div class="stat"><strong>60s <span class="arrow">→</span> 8.3s</strong><span>response time after optimization</span></div>
+        <div class="stat"><strong>46 <span class="arrow">→</span> 3.6 MB</strong><span>page payload reduction</span></div>
+        <div class="stat"><strong>5</strong><span>engineers led &amp; mentored</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section id="about">
+    <div class="wrap">
+      <div class="about-grid">
+        <div>
+          <span class="label">About</span>
+          <h2>Backend depth, applied to AI</h2>
+          <p style="margin-top:1.2rem">I'm an AI engineer and backend lead. For most of my career I've built the systems behind products: REST APIs, microservices, search and the integrations that connect them. Over the last two years I've focused on putting LLMs into those systems in ways that hold up in production.</p>
+          <p>At Turing I worked on foundational LLM improvement projects for FAAMG partners, designing prompts, multi-turn conversations and function-calling scenarios, and building evaluation frameworks to find where models fail. That work shapes how I build now: retrieval first, outputs evaluated, failure modes planned for.</p>
+          <p>At DevDen I lead backend work for Nice2Stay, a global booking platform, where Elasticsearch powers retrieval over a large property dataset.</p>
+        </div>
+        <dl class="facts">
+          <div><dt>Focus</dt><dd>LLMs · RAG · Agents</dd></div>
+          <div><dt>Core stack</dt><dd>Python · Rails · Elasticsearch</dd></div>
+          <div><dt>Current role</dt><dd>Backend Lead, DevDen</dd></div>
+          <div><dt>Based in</dt><dd>Pakistan (PKT, UTC+5)</dd></div>
+          <div><dt>Works with</dt><dd>EU, US &amp; APAC teams</dd></div>
+          <div><dt>Open to</dt><dd>Full-time &amp; contract</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills -->
+  <section id="skills">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="label">Skills</span>
+        <h2>What I build with</h2>
+      </div>
+      <div class="skills">
+        <article class="skill">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v3m0 12v3M3 12h3m12 0h3M6.3 6.3l2.1 2.1m7.2 7.2 2.1 2.1M6.3 17.7l2.1-2.1m7.2-7.2 2.1-2.1"/><circle cx="12" cy="12" r="3"/></svg>AI &amp; LLM</h3>
+          <div class="chips"><span class="chip">LangChain</span><span class="chip">LangGraph</span><span class="chip">OpenAI API</span><span class="chip">Claude API</span><span class="chip">RAG design</span><span class="chip">Prompt engineering</span><span class="chip">Function calling</span><span class="chip">Model evaluation</span><span class="chip">AI agents</span></div>
+        </article>
+        <article class="skill">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>Search &amp; Retrieval</h3>
+          <div class="chips"><span class="chip">Elasticsearch</span><span class="chip">Semantic search</span><span class="chip">Hybrid / BM25</span><span class="chip">Embeddings</span><span class="chip">Vector search</span><span class="chip">Custom ranking</span></div>
+        </article>
+        <article class="skill">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m8 7-5 5 5 5m8-10 5 5-5 5"/></svg>Python</h3>
+          <div class="chips"><span class="chip">FastAPI</span><span class="chip">Django</span><span class="chip">Flask</span><span class="chip">Async APIs</span><span class="chip">Data pipelines</span></div>
+        </article>
+        <article class="skill">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/></svg>Backend &amp; APIs</h3>
+          <div class="chips"><span class="chip">Ruby on Rails</span><span class="chip">REST design</span><span class="chip">Microservices</span><span class="chip">PostgreSQL</span><span class="chip">MySQL</span><span class="chip">Redis</span><span class="chip">Sidekiq</span></div>
+        </article>
+        <article class="skill">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="5" cy="12" r="2.2"/><circle cx="19" cy="6" r="2.2"/><circle cx="19" cy="18" r="2.2"/><path d="M7 11l10-4M7 13l10 4"/></svg>Automation</h3>
+          <div class="chips"><span class="chip">n8n</span><span class="chip">Agent orchestration</span><span class="chip">Multi-step workflows</span><span class="chip">Tool use</span><span class="chip">Retry &amp; error handling</span></div>
+        </article>
+        <article class="skill">
+          <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 8.5a4 4 0 0 1-1 9.5H7Z"/></svg>DevOps &amp; Cloud</h3>
+          <div class="chips"><span class="chip">Docker</span><span class="chip">Kubernetes</span><span class="chip">AWS</span><span class="chip">Heroku</span><span class="chip">CI/CD</span><span class="chip">Linux</span><span class="chip">TDD</span></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Experience -->
+  <section id="experience">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="label">Experience</span>
+        <h2>Where I've worked</h2>
+      </div>
+      <div class="timeline">
+        <article class="role">
+          <div class="role-head">
+            <h3>Backend Lead / Senior AI-Integrated Engineer · <span class="org">DevDen</span></h3>
+            <time>2023 — Present</time>
+          </div>
+          <ul>
+            <li>Architected and shipped AI-powered backend systems that integrate OpenAI and Anthropic APIs into production FastAPI and Rails services, including content generation and search ranking.</li>
+            <li>Built RAG pipeline foundations with Elasticsearch as the retrieval layer, giving context-aware, relevance-ranked results over large property datasets.</li>
+            <li>Designed LangChain agent workflows for data processing and multi-step API orchestration, replacing manual work.</li>
+            <li>Led n8n automation connecting internal systems with external APIs, cutting manual operational overhead.</li>
+            <li>Cut response times from 60s to 8.3s and page payloads from 46 MB to 3.6 MB.</li>
+            <li>Owned CI/CD and containerized deployments on Docker, Kubernetes and AWS. Led and mentored a team of 5 engineers.</li>
+          </ul>
+          <div class="chips"><span class="chip">FastAPI</span><span class="chip">Rails</span><span class="chip">Elasticsearch</span><span class="chip">LangChain</span><span class="chip">n8n</span><span class="chip">Kubernetes</span><span class="chip">AWS</span></div>
+        </article>
+
+        <article class="role">
+          <div class="role-head">
+            <h3>LLM Trainer, Python &amp; Ruby · <span class="org">Turing</span></h3>
+            <time>Nov 2024 — Jan 2026</time>
+          </div>
+          <ul>
+            <li>Designed and evaluated prompts, multi-turn conversations and agent function-calling scenarios for foundational model companies, feeding fine-tuning and benchmark datasets.</li>
+            <li>Built prompt and validation frameworks to evaluate model output across reasoning, coding and tool use, finding failure modes and edge cases systematically.</li>
+            <li>Worked with FAAMG engineering teams to improve instruction-following reliability.</li>
+            <li>Developed automated QA pipelines for training-data quality control.</li>
+          </ul>
+          <div class="chips"><span class="chip">LLM evaluation</span><span class="chip">Prompt engineering</span><span class="chip">Function calling</span><span class="chip">Python</span><span class="chip">Ruby</span></div>
+        </article>
+
+        <article class="role">
+          <div class="role-head">
+            <h3>Software Engineer, Full Stack · <span class="org">DevDen</span></h3>
+            <time>2021 — 2023</time>
+          </div>
+          <ul>
+            <li>Integrated third-party services (Google APIs, Stripe, channel managers) into Python and Rails backends.</li>
+            <li>Built a microservices architecture with modular, independently scalable components.</li>
+            <li>Developed multi-step business workflows with complex conditional logic, state management and failure handling.</li>
+            <li>Implemented Elasticsearch-powered search with custom ranking and filtering.</li>
+          </ul>
+          <div class="chips"><span class="chip">Python</span><span class="chip">Rails</span><span class="chip">Stripe</span><span class="chip">Elasticsearch</span><span class="chip">Microservices</span></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects -->
+  <section id="projects">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="label">Projects</span>
+        <h2>Selected work</h2>
+      </div>
+      <div class="projects">
+        <article class="project">
+          <div class="project-art"><canvas data-art="graph" aria-hidden="true"></canvas></div>
+          <div class="project-body">
+            <h3>LLM Agent &amp; RAG Pipelines</h3>
+            <p>Multi-step agent workflows in LangChain and LangGraph, plus RAG pipelines that ground LLM answers in proprietary data retrieved from Elasticsearch. Prompt frameworks with structured evaluation and quality scoring.</p>
+            <div class="chips"><span class="chip">LangGraph</span><span class="chip">OpenAI</span><span class="chip">Claude</span><span class="chip">FastAPI</span></div>
+          </div>
+        </article>
+        <article class="project">
+          <div class="project-art"><canvas data-art="map" aria-hidden="true"></canvas></div>
+          <div class="project-body">
+            <h3>Nice2Stay</h3>
+            <p>A global booking platform. I built its search ranking on Elasticsearch, combining vector-style scoring with traditional filters for property discovery, and run its containerized services on AWS.</p>
+            <div class="chips"><span class="chip">Elasticsearch</span><span class="chip">Python</span><span class="chip">Rails</span><span class="chip">AWS</span></div>
+          </div>
+        </article>
+        <article class="project">
+          <div class="project-art"><canvas data-art="flow" aria-hidden="true"></canvas></div>
+          <div class="project-body">
+            <h3>n8n Automation Platform</h3>
+            <p>Trigger-based workflows that connect LLM APIs, internal databases and external services, with conditional branching, error handling and retries for reliable runs.</p>
+            <div class="chips"><span class="chip">n8n</span><span class="chip">REST APIs</span><span class="chip">Python</span><span class="chip">LLMs</span></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Education -->
+  <section id="education">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="label">Education &amp; Achievements</span>
+        <h2>Background</h2>
+      </div>
+      <div class="edu-grid">
+        <article class="edu">
+          <h3>B.Sc. Computer Science</h3>
+          <p class="org">National University of Computer &amp; Emerging Sciences (FAST)</p>
+          <time>2017 — 2021</time>
+          <ul><li>Dean's Honor List: Spring 2018, Fall 2018, Fall 2020, Spring 2021</li></ul>
+        </article>
+        <article class="edu">
+          <h3>Cloud Native &amp; Mobile Web Computing</h3>
+          <p class="org">Presidential Initiative for AI &amp; Computing (PIAIC)</p>
+          <time>2019 — 2021</time>
+          <ul><li>Cloud-native architecture, containers, API design and modern AI application patterns</li></ul>
+        </article>
+        <article class="edu" style="grid-column:1/-1">
+          <h3>Competitive programming</h3>
+          <ul>
+            <li>Bronze Medal, NUCES CFD Campus, Fall 2020</li>
+            <li>Runner Up, Nascon'19 Battle of Brains, NUCES Islamabad</li>
+            <li>Code Debug Winner, Kath'18, University of Gujrat</li>
+            <li>Speed Programming Competition, IRIS 2.0, Riphah International</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact" class="contact">
+    <div class="wrap">
+      <span class="label">Contact</span>
+      <h2>Let's build something together</h2>
+      <p style="color:var(--muted);max-width:56ch;margin:1rem 0 0">Hiring for an AI or backend role, or need help with a RAG system, an agent workflow or search? Get in touch.</p>
+      <div class="contact-grid">
+        <div class="contact-card">
+          <div><small>Email</small><a href="mailto:asadsarfraz234@gmail.com" id="email">asadsarfraz234@gmail.com</a></div>
+          <button class="copy" data-copy="asadsarfraz234@gmail.com">Copy</button>
+        </div>
+        <div class="contact-card">
+          <div><small>Phone / WhatsApp</small><span class="val" id="phone">+92 333 9803424</span></div>
+          <button class="copy" data-copy="+923339803424">Copy</button>
+        </div>
+        <div class="contact-card">
+          <div><small>LinkedIn</small><a href="https://www.linkedin.com/in/muhammad-asad-sarfraz" target="_blank" rel="noopener">in/muhammad-asad-sarfraz</a></div>
+        </div>
+        <div class="contact-card">
+          <div><small>GitHub</small><a href="https://github.com/asadsarfraz2347" target="_blank" rel="noopener">github.com/asadsarfraz2347</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© <span id="year">2026</span> Muhammad Asad Sarfraz</span>
+    <span>Built with plain HTML &amp; CSS</span>
+  </div>
+</footer>
+
+<script>
+(() => {
+  // Mobile menu
+  const btn = document.getElementById('menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  btn.addEventListener('click', () => {
+    menu.hidden = !menu.hidden;
+    btn.setAttribute('aria-expanded', String(!menu.hidden));
+    btn.textContent = menu.hidden ? 'Menu' : 'Close';
+  });
+  menu.addEventListener('click', e => {
+    if (e.target.closest('a')) { menu.hidden = true; btn.setAttribute('aria-expanded', 'false'); btn.textContent = 'Menu'; }
+  });
+
+  // Copy buttons
+  document.querySelectorAll('.copy').forEach(b => {
+    b.addEventListener('click', () => {
+      const text = b.dataset.copy;
+      const done = () => { b.textContent = 'Copied'; setTimeout(() => b.textContent = 'Copy', 1500); };
+      const fallback = () => {
+        const target = b.parentElement.querySelector('a, .val');
+        const r = document.createRange(); r.selectNodeContents(target);
+        const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+        b.textContent = 'Selected';
+        setTimeout(() => b.textContent = 'Copy', 1500);
+      };
+      try { navigator.clipboard.writeText(text).then(done, fallback); } catch { fallback(); }
+    });
+  });
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // Pipeline: highlight steps in turn
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const steps = [...document.querySelectorAll('#pipeline .step')];
+  if (!reduce) {
+    let i = 0;
+    setInterval(() => {
+      steps.forEach(s => s.classList.remove('active'));
+      i = (i + 1) % steps.length;
+      steps[i].classList.add('active');
+    }, 1400);
+  }
+
+  // Project art: small generative drawings in the accent colour
+  const css = getComputedStyle(document.documentElement);
+  const accent = css.getPropertyValue('--accent').trim();
+  const amber = css.getPropertyValue('--accent-2').trim();
+  const line = css.getPropertyValue('--line').trim();
+  let seed = 7;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+  function draw(c) {
+    const dpr = devicePixelRatio || 1;
+    const w = c.clientWidth, h = c.clientHeight;
+    c.width = w * dpr; c.height = h * dpr;
+    const g = c.getContext('2d'); g.scale(dpr, dpr);
+    g.clearRect(0, 0, w, h);
+    seed = 7;
+    const kind = c.dataset.art;
+    if (kind === 'graph') {
+      const pts = Array.from({length: 14}, () => [20 + rnd() * (w - 40), 18 + rnd() * (h - 36)]);
+      g.strokeStyle = line; g.lineWidth = 1;
+      pts.forEach((p, i) => pts.slice(i + 1).forEach(q => {
+        if (Math.hypot(p[0] - q[0], p[1] - q[1]) < 90) { g.beginPath(); g.moveTo(...p); g.lineTo(...q); g.stroke(); }
+      }));
+      pts.forEach((p, i) => { g.fillStyle = i % 4 === 0 ? amber : accent; g.beginPath(); g.arc(p[0], p[1], i % 4 === 0 ? 4 : 2.5, 0, 7); g.fill(); });
+    } else if (kind === 'map') {
+      g.strokeStyle = line;
+      for (let x = 0; x < w; x += 22) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke(); }
+      for (let y = 0; y < h; y += 22) { g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); }
+      for (let i = 0; i < 9; i++) {
+        const x = 20 + rnd() * (w - 40), y = 20 + rnd() * (h - 40), top = i < 3;
+        g.fillStyle = top ? accent : amber; g.globalAlpha = top ? 1 : .6;
+        g.beginPath(); g.arc(x, y - 6, 5, Math.PI, 0); g.lineTo(x, y + 4); g.closePath(); g.fill();
+      }
+      g.globalAlpha = 1;
+    } else {
+      const n = 5, gap = (w - 40) / (n - 1), y = h / 2;
+      g.strokeStyle = line; g.lineWidth = 1.5;
+      g.beginPath(); g.moveTo(20, y); g.lineTo(w - 20, y); g.stroke();
+      g.beginPath(); g.moveTo(20 + gap, y); g.bezierCurveTo(20 + gap * 1.5, y - 40, 20 + gap * 2.5, y - 40, 20 + gap * 3, y); g.stroke();
+      for (let i = 0; i < n; i++) {
+        const x = 20 + i * gap;
+        g.fillStyle = i === 2 ? amber : accent;
+        g.fillRect(x - 9, y - 9, 18, 18);
+      }
+      g.fillStyle = amber; g.fillRect(20 + gap * 2 - 9, y - 39, 18, 18);
+    }
+  }
+  const canvases = document.querySelectorAll('[data-art]');
+  canvases.forEach(draw);
+  addEventListener('resize', () => canvases.forEach(draw));
+})();
+</script>
+</body>
+</html>
